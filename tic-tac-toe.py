@@ -3,18 +3,12 @@ pygame.init()
 
 canvasWidth = 500
 canvasHeight = 500
-
-win = pygame.display.set_mode((canvasWidth, canvasHeight)) #creates the surface for everything to be drawn on
-
+win = pygame.display.set_mode((canvasWidth, canvasHeight+50)) #creates the surface for everything to be drawn on
 pygame.display.set_caption("Tic Tac Toe")  #sets the name of the window
-
-pygame.draw.rect(win, (255,255,255), (canvasWidth/3, 0, 2, canvasHeight)) #draws the board
-pygame.draw.rect(win, (255,255,255), ((2*canvasWidth)/3, 0, 2, canvasHeight))
-pygame.draw.rect(win, (255,255,255), (0, canvasHeight/3, canvasWidth, 2))
-pygame.draw.rect(win, (255,255,255), (0, (2*canvasHeight/3), canvasWidth, 2))
 
 
 def main():
+    drawBoard()
     positions = [0,0,0,0,0,0,0,0,0] #list of all positions on the board, 0 = empty, 1 = x, and -1 = o
     symbol = 'x'
     run = True
@@ -25,91 +19,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
         
-        mouseX, mouseY = pygame.mouse.get_pos() #gets the current x and y of the mouse
-        
-        if (mouseX < canvasWidth/3 and mouseX > 0) and (mouseY < canvasHeight/3 and mouseY > 0) and positions[0] == 0 and pygame.mouse.get_pressed()[0]: #check if the mouse is clicked and in the top left corner and there is nothing in the top left corner
-            position = 1
-            drawSymbol(position, symbol)
-            if symbol == "x":
-                positions[0] = 1
-                symbol = 'o'
-            else:
-                positions[0] = -1
-                symbol = 'x'
-        elif (mouseX < (2*canvasWidth/3) and mouseX > canvasWidth/3) and (mouseY < canvasHeight/3 and mouseY > 0) and positions[1] == 0 and pygame.mouse.get_pressed()[0]:
-            position = 2
-            drawSymbol(position, symbol)
-            if symbol == "x":
-                positions[1] = 1
-                symbol = 'o'
-            else:
-                positions[1] = -1
-                symbol = 'x'
-        elif (mouseX < (canvasWidth) and mouseX > 2*canvasWidth/3) and (mouseY < canvasHeight/3 and mouseY > 0) and positions[2] == 0 and pygame.mouse.get_pressed()[0]:
-            position = 3
-            drawSymbol(position, symbol)
-            if symbol == "x":
-                positions[2] = 1
-                symbol = 'o'
-            else:
-                positions[2] = -1
-                symbol = 'x'
-        elif (mouseX < canvasWidth/3 and mouseX > 0) and (mouseY < (2*canvasHeight/3) and mouseY > canvasHeight/3) and positions[3] == 0 and pygame.mouse.get_pressed()[0]:
-            position = 4
-            drawSymbol(position, symbol)
-            if symbol == "x":
-                positions[3] = 1
-                symbol = 'o'
-            else:
-                positions[3] = -1
-                symbol = 'x'
-        elif (mouseX < (2*canvasWidth/3) and mouseX > canvasWidth/3) and (mouseY < (2*canvasHeight/3) and mouseY > canvasHeight/3) and positions[4] == 0 and pygame.mouse.get_pressed()[0]:
-            position = 5
-            drawSymbol(position, symbol)
-            if symbol == "x":
-                positions[4] = 1
-                symbol = 'o'
-            else:
-                positions[4] = -1
-                symbol = 'x'
-        elif (mouseX < canvasWidth and mouseX > 2*canvasWidth/3) and (mouseY < (2*canvasHeight/3) and mouseY > canvasWidth/3) and positions[5] == 0 and pygame.mouse.get_pressed()[0]:
-            position = 6
-            drawSymbol(position, symbol)
-            if symbol == "x":
-                positions[5] = 1
-                symbol = 'o'
-            else:
-                positions[5] = -1
-                symbol = 'x'
-        elif (mouseX < (canvasWidth/3) and mouseX > 0) and (mouseY < canvasHeight and mouseY > 2*canvasHeight/3) and positions[6] == 0 and pygame.mouse.get_pressed()[0]:
-            position = 7
-            drawSymbol(position, symbol)
-            if symbol == "x":
-                positions[6] = 1
-                symbol = 'o'
-            else:
-                positions[6] = -1
-                symbol = 'x'
-        elif (mouseX < (2*canvasWidth/3) and mouseX > canvasWidth/3) and (mouseY < canvasHeight and mouseY > 2*canvasHeight/3) and positions[7] == 0 and pygame.mouse.get_pressed()[0]:
-            position = 8
-            drawSymbol(position, symbol)
-            if symbol == "x":
-                positions[7] = 1
-                symbol = 'o'
-            else:
-                positions[7] = -1
-                symbol = 'x'
-        elif (mouseX < canvasWidth and mouseX > 2*canvasWidth/3) and (mouseY < canvasHeight and mouseY > 2*canvasHeight/3) and positions[8] == 0 and pygame.mouse.get_pressed()[0]:
-            position = 9
-            drawSymbol(position, symbol)
-            if symbol == "x":
-                positions[8] = 1
-                symbol = 'o'
-            else:
-                positions[8] = -1
-                symbol = 'x'
-        else:
-            continue
+        positions, symbol = getPos(positions, symbol)
         
         run = winner(positions)
         
@@ -120,12 +30,125 @@ def main():
                 done = False
         
         if done:   
-            print("DONE!!!")
+            print("DRAW")
+            run = False
         #endScreen() #need to implement function for determining the winner
         
         
         pygame.display.update()
-        
+
+def drawBoard():
+    pygame.draw.rect(win, (255,255,255), (canvasWidth/3, 0, 2, canvasHeight)) #draws the board
+    pygame.draw.rect(win, (255,255,255), ((2*canvasWidth)/3, 0, 2, canvasHeight))
+    pygame.draw.rect(win, (255,255,255), (0, canvasHeight/3, canvasWidth, 2))
+    pygame.draw.rect(win, (255,255,255), (0, (2*canvasHeight/3), canvasWidth, 2))
+
+def getPos(positions,symbol):
+    mouseX, mouseY = pygame.mouse.get_pos() #gets the current x and y of the mouse
+    
+    if (mouseX < canvasWidth/3 and mouseX > 0) and (mouseY < canvasHeight/3 and mouseY > 0) and positions[0] == 0 and pygame.mouse.get_pressed()[0]: #check if the mouse is clicked and in the top left corner and there is nothing in the top left corner
+        position = 1
+        drawSymbol(position, symbol)
+        if symbol == "x":
+            positions[0] = 1
+            symbol = 'o'
+            return positions, symbol
+        else:          
+            positions[0] = -1
+            symbol = 'x'
+            return positions, symbol
+    elif (mouseX < (2*canvasWidth/3) and mouseX > canvasWidth/3) and (mouseY < canvasHeight/3 and mouseY > 0) and positions[1] == 0 and pygame.mouse.get_pressed()[0]:
+        position = 2
+        drawSymbol(position, symbol)
+        if symbol == "x":
+            positions[1] = 1
+            symbol = 'o'
+            return positions, symbol
+        else:
+            positions[1] = -1
+            symbol = 'x'
+            return positions, symbol
+    elif (mouseX < (canvasWidth) and mouseX > 2*canvasWidth/3) and (mouseY < canvasHeight/3 and mouseY > 0) and positions[2] == 0 and pygame.mouse.get_pressed()[0]:
+        position = 3
+        drawSymbol(position, symbol)
+        if symbol == "x":
+            positions[2] = 1
+            symbol = 'o'
+            return positions, symbol
+        else:
+            positions[2] = -1
+            symbol = 'x'
+            return positions, symbol
+    elif (mouseX < canvasWidth/3 and mouseX > 0) and (mouseY < (2*canvasHeight/3) and mouseY > canvasHeight/3) and positions[3] == 0 and pygame.mouse.get_pressed()[0]:
+        position = 4
+        drawSymbol(position, symbol)
+        if symbol == "x":
+            positions[3] = 1
+            symbol = 'o'
+            return positions, symbol
+        else:
+            positions[3] = -1
+            symbol = 'x'
+            return positions, symbol
+    elif (mouseX < (2*canvasWidth/3) and mouseX > canvasWidth/3) and (mouseY < (2*canvasHeight/3) and mouseY > canvasHeight/3) and positions[4] == 0 and pygame.mouse.get_pressed()[0]:
+        position = 5
+        drawSymbol(position, symbol)
+        if symbol == "x":
+            positions[4] = 1
+            symbol = 'o'
+            return positions, symbol
+        else:
+            positions[4] = -1
+            symbol = 'x'
+            return positions, symbol
+    elif (mouseX < canvasWidth and mouseX > 2*canvasWidth/3) and (mouseY < (2*canvasHeight/3) and mouseY > canvasWidth/3) and positions[5] == 0 and pygame.mouse.get_pressed()[0]:
+        position = 6
+        drawSymbol(position, symbol)
+        if symbol == "x":
+            positions[5] = 1
+            symbol = 'o'
+            return positions, symbol
+        else:
+            positions[5] = -1
+            symbol = 'x'
+            return positions, symbol
+    elif (mouseX < (canvasWidth/3) and mouseX > 0) and (mouseY < canvasHeight and mouseY > 2*canvasHeight/3) and positions[6] == 0 and pygame.mouse.get_pressed()[0]:
+        position = 7
+        drawSymbol(position, symbol)
+        if symbol == "x":
+            positions[6] = 1
+            symbol = 'o'
+            return positions, symbol
+        else:
+            positions[6] = -1
+            symbol = 'x'
+            return positions, symbol
+    elif (mouseX < (2*canvasWidth/3) and mouseX > canvasWidth/3) and (mouseY < canvasHeight and mouseY > 2*canvasHeight/3) and positions[7] == 0 and pygame.mouse.get_pressed()[0]:
+        position = 8
+        drawSymbol(position, symbol)
+        if symbol == "x":
+            positions[7] = 1
+            symbol = 'o'
+            return positions, symbol
+        else:
+            positions[7] = -1
+            symbol = 'x'
+            return positions, symbol
+    elif (mouseX < canvasWidth and mouseX > 2*canvasWidth/3) and (mouseY < canvasHeight and mouseY > 2*canvasHeight/3) and positions[8] == 0 and pygame.mouse.get_pressed()[0]:
+        position = 9
+        drawSymbol(position, symbol)
+        if symbol == "x":
+            positions[8] = 1
+            symbol = 'o'
+            return positions, symbol
+        else:
+            positions[8] = -1
+            symbol = 'x'
+            return positions, symbol
+    else:
+        return positions, symbol
+    
+
 def winner(positions):
     if (positions[0]+positions[1]+positions[2]) == 3:
         XWin()
@@ -203,19 +226,17 @@ def drawSymbol(position, symbol):
         drawO(x,y)
 
 
-def drawX(x,y):
+def drawX(x,y): #draw X in the correct portion of the grid 
     endX = (x+(canvasWidth/3))
     endY = (y+(canvasHeight/3))
     pygame.draw.line(win,(255,255,255),(x,y),(endX,endY),5)
     pygame.draw.line(win,(255,255,255),(endX,y),(x,endY),5)
     pygame.display.update()
     
-    
-    
-def drawO(x,y):
+def drawO(x,y): #draw O in the correct portion of the grid
     centerX = int(x+((canvasWidth/3)/2))
     centerY = int(y+((canvasHeight/3)/2))
     pygame.draw.circle(win,(255,255,255), (centerX,centerY), int((canvasHeight/3)/2), 5 )
-    
+
 
 main()
