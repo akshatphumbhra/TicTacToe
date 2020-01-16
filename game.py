@@ -1,5 +1,93 @@
 import pygame
 import random
+import time
+
+pygame.init()
+
+width = 600
+height = 600
+
+screen = pygame.display.set_mode((width, height))
+
+#Set caption
+pygame.display.set_caption("Tic Tac Toe")
+
+#Set Icon
+icon = pygame.image.load('tic-tac-toe.png')
+pygame.display.set_icon(icon)
+
+clock = pygame.time.Clock()
+
+availableGrid = ['','','','','','','','','']
+
+#Deciding player 1 at random
+ran=random.randint(0,1)
+if ran == 0:
+    currentPlayer = 'X'
+else:
+    currentPlayer = 'O'
+
+running = True
+
+gameMode = None
+
+#Helper function to create text Objects
+def textObjects(text, font):
+    textSurface = font.render(text, True, (0,0,0))
+    return textSurface, textSurface.get_rect()
+
+#Helper function to create button functionality
+def button(msg,x,y,w,h,ic,ac,action=None):
+    global gameMode
+
+    mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
+
+    if x+w > mouse[0] > x and y+h > mouse[1] > y:
+        pygame.draw.rect(screen, ac,(x,y,w,h))
+        if click[0] == 1 and action != None:
+            #print(action)
+            gameMode = action
+            action()
+    else:
+        pygame.draw.rect(screen, ic,(x,y,w,h))
+
+    smallText = pygame.font.SysFont("comicsansms",20)
+    textSurf, textRect = textObjects(msg, smallText)
+    textRect.center = ( (x+(w/2)), (y+(h/2)) )
+    screen.blit(textSurf, textRect)
+
+#Helper function to quit game
+def quitGame():
+    pygame.quit()
+    quit()
+
+#Runs game introduction.
+def gameIntro():
+
+    intro = True
+    image = pygame.image.load("bg.png")
+    imgRect = image.get_rect()
+    imgRect.left, imgRect.top = 44,44
+
+    while intro:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quitGame()
+
+        screen.fill((228,233,244))
+        screen.blit(image, imgRect)
+        largeText = pygame.font.SysFont("comicsansms",100)
+        TextSurf, TextRect = textObjects("Tic-Tac-Toe", largeText)
+        TextRect.center = ((width/2),100)
+        screen.blit(TextSurf, TextRect)
+
+        button("Solo",(width/2 - 50),250,100,50,(0, 255, 0),(0, 200, 0),solo)
+        button("Duo",(width/2 - 50),350,100,50,(0, 255, 0),(0, 200, 0),duo)
+        button("Quit", (width/2 - 50), 450, 100, 50, (255,0,0), (200,0,0), quitGame)
+
+        pygame.display.update()
+        clock.tick(30)
 
 #Initialize game settings
 def initializeGame():
@@ -98,12 +186,7 @@ def drawX(grid):
 
 
     pygame.draw.line(screen, (0,0,0), (x1,y1), (x2,y2), 3)
-    #pygame.draw.line(screen, (0,0,0), (x1,y1+1), (x2,y2+1))
-    #pygame.draw.line(screen, (0,0,0), (x1+1,y1), (x2+1,y2))
-
     pygame.draw.line(screen, (0,0,0), (x2,y1), (x1,y2), 3)
-    #pygame.draw.line(screen, (0,0,0), (x2+1,y1), (x1+1,y2))
-    #pygame.draw.line(screen, (0,0,0), (x2-1,y1), (x1-1,y2))
 
 def drawO(grid):
     global screen
@@ -143,6 +226,7 @@ def drawO(grid):
 
 def checkWinner(grid):
 
+    tie = True
     x = width/6
     y = height/6
     xs = width/3
@@ -170,20 +254,156 @@ def checkWinner(grid):
     if grid[6] == grid[4] and grid[4] == grid[2] and grid[6] != '':
         return True, grid[4], [(width, 0), (0, height)]
 
+    for grid in availableGrid:
+        if grid == '':
+            tie = False
+
+    if tie:
+        return False, 'tie', ''
     return False, '', ''
 
-def main():
-    global screen, availableGrid, currentPlayer, running
+def endScreen(result):
+    time.sleep(0.1)
+    largeText = pygame.font.SysFont("comicsansms",100)
 
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quitGame()
+
+        if result == "tie":
+
+            TextSurf, TextRect = textObjects("Draw Game!", largeText)
+            TextRect.center = ((width/2),100)
+            screen.blit(TextSurf, TextRect)
+
+        else:
+            msg = result + " Won!"
+            TextSurf, TextRect = textObjects(msg, largeText)
+            TextRect.center = ((width/2),100)
+            screen.blit(TextSurf, TextRect)
+
+
+        button("Retry", (width/2 - 50),200,100,50,(0, 255, 0),(0, 200, 0), gameMode)
+        button("Menu",(width/2 - 50),300,100,50,(0, 255, 0),(0, 200, 0), gameIntro)
+        button("Quit", (width/2 - 50), 400, 100, 50, (255,0,0), (200,0,0), quitGame)
+
+        pygame.display.update()
+        clock.tick(30)
+
+def solo():
+    time.sleep(0.3)
+    global screen, availableGrid, currentPlayer, running
+    tie = False
     initializeGame()
 
+    firstMove = True
+
+    while running:
+        #print(currentPlayer)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quitGame()
+
+        if currentPlayer == 'X':
+
+            click = pygame.mouse.get_pressed()
+            if click[0] == 1:
+
+                mx, my = pygame.mouse.get_pos()
+                grid = getGrid(mx, my)
+                if availableGrid[grid] == "":
+                    drawX(grid)
+                    availableGrid[grid] = 'X'
+                    currentPlayer = 'O'
+                    firstMove = False
+
+
+
+        else:
+            bestMove()
+            currentPlayer = 'X'
+
+        hasWon, winner, strikeThrough = checkWinner(availableGrid)
+        if hasWon:
+            pygame.draw.line(screen, (255,0,0), strikeThrough[0], strikeThrough[1], 3)
+            endScreen(winner)
+
+        elif winner == 'tie':
+            endScreen("tie")
+
+        pygame.display.update()
+        clock.tick(30)
+
+
+def bestMove():
+
+    global availableGrid
+    bestScore = -100
+    move = -1
+
+    for i in range(len(availableGrid)):
+        if availableGrid[i] == '':
+            availableGrid[i] = 'O'
+            score = minimax(availableGrid, False);
+            availableGrid[i] = ""
+            if score > bestScore:
+                bestScore = score
+                move = i
+
+    #print(move)
+    availableGrid[move] = 'O'
+    drawO(move)
+
+
+def minimax(grid, isMaximizing):
+    hasWon, winner, strikeThrough = checkWinner(grid)
+
+    if hasWon:
+        if winner == "X":
+            return -1
+        elif winner == 'O':
+            return 1
+
+    elif winner == 'tie':
+        return 0
+
+    if isMaximizing:
+        bestScore = -100
+        for i in range(len(grid)):
+            if grid[i] == "":
+                grid[i] = 'O'
+                score = minimax(grid, False)
+                #print("Score Max", score)
+                grid[i] = ""
+                #print(score, bestScore)
+                if score >= bestScore:
+                    bestScore = score
+        return bestScore
+
+    else:
+        bestScore = 100
+        for i in range(len(grid)):
+            if grid[i] == '':
+                grid[i] = 'X'
+                score = minimax(grid, True)
+                #print("Score Min", score)
+                grid[i] = ''
+                if score <= bestScore:
+                    bestScore = score
+        return bestScore
+
+def duo():
+    global screen, availableGrid, currentPlayer, running
+    initializeGame()
+    currentPlayer = 'X'
     #Game Loop
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-                break
+                quitGame()
             if event.type == pygame.MOUSEBUTTONDOWN:
+                #print(event)
                 mx, my = pygame.mouse.get_pos()
                 grid = getGrid(mx, my)
                 if availableGrid[grid] == '':
@@ -196,34 +416,21 @@ def main():
                         availableGrid[grid] = 'O'
                         currentPlayer = 'X'
 
-                    hasWon, winner, strikeThrough = checkWinner(availableGrid)
-                    if hasWon:
-                        pygame.draw.line(screen, (255,0,0), strikeThrough[0], strikeThrough[1], 3)
-            pygame.display.update()
+        hasWon, winner, strikeThrough = checkWinner(availableGrid)
+        if hasWon:
+            pygame.draw.line(screen, (255,0,0), strikeThrough[0], strikeThrough[1], 3)
+            endScreen(winner)
 
-pygame.init()
+        elif winner == 'tie':
+            endScreen("tie")
 
-width = 600
-height = 600
+        pygame.display.update()
+        clock.tick(30)
 
-screen = pygame.display.set_mode((width, height))
-
-#Set caption
-pygame.display.set_caption("Tic Tac Toe")
-
-#Set Icon
-icon = pygame.image.load('tic-tac-toe.png')
-pygame.display.set_icon(icon)
-
-availableGrid = ['','','','','','','','','']
-
-#Deciding player 1 at random
-ran=random.randint(0,1)
-if ran == 0:
-    currentPlayer = 'X'
-else:
-    currentPlayer = 'O'
-
-running = True
-
-main()
+gameIntro()
+grid = [
+'X','X','O',
+'O','X','X',
+'','','O'
+]
+#print(minimax(grid, True))
